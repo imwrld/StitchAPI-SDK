@@ -1,0 +1,12 @@
+{
+  "name": "stitchapis",
+  "version": "1.0.0",
+  "description": "Official StitchAPIs SDK — clients for every anti-bot solver (PerimeterX, hCaptcha, Shape/F5, reCAPTCHA v3, DataDome, Incapsula, Amazon metadata1).",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "type": "commonjs",
+  "files": ["index.js", "index.d.ts", "README.md"],
+  "keywords": ["stitchapis", "captcha", "perimeterx", "hcaptcha", "shape", "recaptcha", "datadome", "incapsula", "antibot"],
+  "license": "UNLICENSED",
+  "engines": { "node": ">=18" }
+}

@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stitchapis"
+version = "1.0.0"
+description = "Official StitchAPIs SDK — clients for every anti-bot solver (PerimeterX, hCaptcha, Shape/F5, reCAPTCHA v3, DataDome, Incapsula, Amazon metadata1)."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "UNLICENSED" }
+keywords = ["stitchapis", "captcha", "perimeterx", "hcaptcha", "shape", "recaptcha", "datadome", "incapsula", "antibot"]
+
+# `requests` is optional — the SDK falls back to urllib if it's not installed.
+[project.optional-dependencies]
+requests = ["requests>=2.20"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["stitchapis*"]
