@@ -62,7 +62,7 @@ pip install stitchapis
 
 **Go**
 ```bash
-go get github.com/imwrld/StitchAPIsSDK/go/stitchapis
+go get github.com/imwrld/StitchAPI-SDK/stitchapis
 ```
 > Using your own fork? Point the import at your module path — the layout is `<module>/stitchapis`.
 
@@ -115,7 +115,7 @@ import (
     "fmt"
     "log"
 
-    "github.com/imwrld/StitchAPIsSDK/go/stitchapis"
+    "github.com/imwrld/StitchAPI-SDK/stitchapis"
 )
 
 func main() {
