@@ -4,7 +4,7 @@
 
 **Official client libraries for the [StitchAPIs](https://stitchapis.io/) solver API — one clean interface for every anti-bot challenge.**
 
-Solve PerimeterX, Shape / F5, hCaptcha, reCAPTCHA v3, DataDome, Incapsula and more — from **JavaScript / TypeScript**, **Python**, or **Go**.
+Solve PerimeterX, hCaptcha, reCAPTCHA v3, DataDome, Incapsula and more — from **JavaScript / TypeScript**, **Python**, or **Go**.
 
 ![JavaScript](https://img.shields.io/badge/JavaScript-Node%2018%2B-f7df1e?logo=javascript&logoColor=black)
 ![Python](https://img.shields.io/badge/Python-3.8%2B-3776ab?logo=python&logoColor=white)
@@ -32,7 +32,6 @@ Solve PerimeterX, Shape / F5, hCaptcha, reCAPTCHA v3, DataDome, Incapsula and mo
 | PerimeterX hold-captcha | `POST /web/cookie/hc` | `pxHoldCookie` | `px_hold_cookie` | `PXHoldCookie` |
 | PerimeterX collect | `POST /web/px/collect` | `pxCollect` | `px_collect` | `PXCollect` |
 | hCaptcha | `POST /web/hcaptcha/solve` | `hcaptcha` | `hcaptcha` | `Hcaptcha` |
-| Shape / F5 | `POST /web/shape` | `shape` | `shape` | `Shape` |
 | reCAPTCHA v3 | `POST /web/recaptcha/v3` | `recaptchaV3` | `recaptcha_v3` | `RecaptchaV3` |
 | DataDome interstitial | `POST /web/datadome/interstitial` | `datadomeInterstitial` | `datadome_interstitial` | `DatadomeInterstitial` |
 | DataDome slider | `POST /web/datadome/slider` | `datadomeSlider` | `datadome_slider` | `DatadomeSlider` |
@@ -305,91 +304,6 @@ print(res["token"])
 ```
 ```go
 res, err := client.Hcaptcha(stitchapis.Params{"sitekey": "10000000-ffff-ffff-ffff-000000000001", "domain": "example.com"})
-```
-</details>
-
----
-
-### 🛡️ Shape / F5 — `shape`
-
-Returns the request headers plus the finalized request body to send to the endpoint the header rides on, along with the `userAgent` the headers were computed under.
-
-| Field | Type | Notes |
-|---|---|---|
-| **`triggerUrl`** | string | The endpoint the header rides on (selects the flow). |
-| **`proxy`** | string | Recommended; required for sites that block datacenter IPs. |
-| `requestBody` | string | The exact body of that request, if it has one. |
-| `visitorId`, `tealeafId` | string | Pin a session-stable identity across calls in one flow. |
-
-**Returns:** `headers`, `device`, `userAgent`, `requestBody`.
-
-> The returned header **names** can rotate per session — read them from `headers` and send whatever keys come back. Use the returned `userAgent` as your request's User-Agent, and send `requestBody` verbatim.
-
-<details><summary><b>Example</b></summary>
-
-```js
-const shape = await client.shape({
-  triggerUrl: "https://example.com/signin",
-  proxy: "host:port:user:pass",
-  requestBody: '[{"email":"you@example.com","password":"..."}]',
-});
-// send shape.headers + shape.requestBody to triggerUrl, with User-Agent = shape.userAgent
-console.log(Object.keys(shape.headers));
-```
-```python
-shape = client.shape(
-    trigger_url="https://example.com/signin",
-    proxy="host:port:user:pass",
-    requestBody='[{"email":"you@example.com","password":"..."}]',
-)
-print(list(shape["headers"].keys()))
-```
-```go
-shape, err := client.Shape(stitchapis.Params{
-    "triggerUrl":  "https://example.com/signin",
-    "proxy":       "host:port:user:pass",
-    "requestBody": `[{"email":"you@example.com","password":"..."}]`,
-})
-```
-</details>
-
-#### Worked example — Target.com login (one endpoint, multi-step)
-
-A Target login is a **sequence** of protected `gsp.target.com` calls, each carrying its own Shape header. Use the **same `shape` call** for every step — pin one `visitorId` (and `tealeafId`) and reuse it across all steps so every call shares one Shape session and one User-Agent. For each step, send the returned `headers` + `requestBody` to that step's `triggerUrl`, with `userAgent` as your User-Agent. Values below are templated.
-
-<details><summary><b>Example</b></summary>
-
-```js
-const GSP = "https://gsp.target.com/gsp/authentications/v1";
-const visitorId = "0000EXAMPLEVID0000EXAMPLE0000"; // one identity for the whole login
-const tealeafId = "example-tealeaf-id";
-
-// Each step: StitchAPIs makes the headers, you POST the finalized body to triggerUrl.
-const steps = [
-  { triggerUrl: `${GSP}/passwordless_preauthentications`, requestBody: "{}" },
-  { triggerUrl: `${GSP}/username_validations?client_id=ecom-web-1.0.0&signin_amr=true`,
-    requestBody: JSON.stringify({ username: "example@email.com" }) },
-  { triggerUrl: `${GSP}/credential_validations?client_id=ecom-web-1.0.0`,
-    requestBody: JSON.stringify({ username: "example@email.com", password: "test123", keep_me_signed_in: false }) },
-];
-
-for (const step of steps) {
-  const s = await client.shape({ ...step, visitorId, tealeafId });
-  // POST s.requestBody to step.triggerUrl with s.headers and User-Agent = s.userAgent
-  await fetch(step.triggerUrl, { method: "POST", headers: { ...s.headers, "user-agent": s.userAgent, "content-type": "application/json" }, body: s.requestBody });
-}
-```
-```python
-GSP = "https://gsp.target.com/gsp/authentications/v1"
-visitor_id, tealeaf_id = "0000EXAMPLEVID0000EXAMPLE0000", "example-tealeaf-id"
-steps = [
-    (f"{GSP}/passwordless_preauthentications", "{}"),
-    (f"{GSP}/username_validations?client_id=ecom-web-1.0.0&signin_amr=true", '{"username":"example@email.com"}'),
-    (f"{GSP}/credential_validations?client_id=ecom-web-1.0.0", '{"username":"example@email.com","password":"test123","keep_me_signed_in":false}'),
-]
-for trigger_url, request_body in steps:
-    s = client.shape(trigger_url=trigger_url, requestBody=request_body, visitorId=visitor_id, tealeafId=tealeaf_id)
-    # POST s["requestBody"] to trigger_url with s["headers"] and User-Agent = s["userAgent"]
 ```
 </details>
 
